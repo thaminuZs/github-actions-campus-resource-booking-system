@@ -1,0 +1,35 @@
+name: Run Tests
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch: # Allows triggering the workflow manually from GitHub UI
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install project dependencies
+        run: npm install
+
+      # Installs jest and supertest in CI without modifying package.json
+      - name: Install test runners (Jest & Supertest)
+        run: npm install --no-save jest supertest
+
+      # Runs the tests using Node's experimental VM modules (required for ES Modules)
+      - name: Execute Jest + Supertest test suite
+        run: node --experimental-vm-modules ./node_modules/jest/bin/jest.js --verbose
+        env:
+          NODE_OPTIONS: "--experimental-vm-modules"
